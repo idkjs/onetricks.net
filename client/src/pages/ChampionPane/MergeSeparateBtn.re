@@ -1,11 +1,10 @@
-let component = ReasonReact.statelessComponent("MergeSeparateBtn");
 
-let make = (~areChampionPanesMerged, ~onClick, _children) => {
-  ...component,
-  render: _self =>
+[@react.component]
+let make = (~areChampionPanesMerged, ~onClick) => {
+
     switch (
-      ReasonReact.Router.dangerouslyGetInitialUrl().path,
-      ReasonReact.Router.dangerouslyGetInitialUrl().search,
+      ReasonReactRouter.dangerouslyGetInitialUrl().path,
+      ReasonReactRouter.dangerouslyGetInitialUrl().search,
     ) {
     | ([], "") =>
       <button className="merge-sep-button" onClick>
@@ -23,6 +22,6 @@ let make = (~areChampionPanesMerged, ~onClick, _children) => {
           </span>
         </span>
       </button>
-    | _ => ReasonReact.null
-    },
+    | _ => React.null
+    }
 };

@@ -1,6 +1,6 @@
 open Jest;
 
-open Types;
+open TTypes;
 
 let mock_Aatrox = {
   champion: "Aatrox",

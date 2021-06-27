@@ -35,7 +35,7 @@ let toCsvString = (ranks: ranks) => {
     ranks
     |> List.fold_left(
          (total, current) =>
-           total ++ "," ++ String.uppercase(current |> toString),
+           total ++ "," ++ String.uppercase_ascii(current |> toString),
          "",
        );
   if (String.length(tmp) > 0) {

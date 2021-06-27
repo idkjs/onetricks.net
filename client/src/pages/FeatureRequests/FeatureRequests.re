@@ -1,8 +1,6 @@
-let component = ReasonReact.statelessComponent("FeatureRequests");
 
-let make = _children => {
-  ...component,
-  render: _self =>
+[@react.component] let make = ()=> {
+
     <div>
       <p>
         (
@@ -26,5 +24,5 @@ let make = _children => {
           )
         )
       </p>
-    </div>,
+    </div>
 };

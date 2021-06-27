@@ -9,7 +9,7 @@ type route =
   | RiotEndorsement
   | NotFound;
 
-let routeFromUrl = (url: ReasonReact.Router.url) =>
+let routeFromUrl = (url: ReasonReactRouter.url) =>
   switch (url.path, url.search) {
   | ([], _) => Home
   | (["champions", championName], "") => PlayersView(championName, Rank.All)
@@ -63,7 +63,7 @@ let routeToUrl = (route: route) =>
   | NotFound => "/404"
   };
 
-let isRouteOrSubroute = (url: ReasonReact.Router.url, ~ofRoute: route): bool => {
+let isRouteOrSubroute = (url: ReasonReactRouter.url, ~ofRoute: route): bool => {
   let currentRoute = url |> routeFromUrl;
   currentRoute == ofRoute;
 };

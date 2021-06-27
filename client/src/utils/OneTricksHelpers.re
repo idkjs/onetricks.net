@@ -1,9 +1,9 @@
-open Types;
+open TTypes;
 
 let extractPlayers = (~currentChampion: string, listOfOneTricks) => {
   let target =
     List.filter(
-      el => String.lowercase(el.champion) === currentChampion,
+      el => String.lowercase_ascii(el.champion) === currentChampion,
       listOfOneTricks,
     );
   if (List.length(target) === 1) {
@@ -61,9 +61,9 @@ let filterBySearchKey = (searchKey: string, oneTricks) =>
   if (String.length(searchKey) > 0) {
     oneTricks
     |> List.filter(oneTrick => {
-         let string = String.lowercase(oneTrick.champion);
-         let substring = String.lowercase(searchKey);
-         let jsIndexOf: (string, string) => int = [%bs.raw
+         let string = String.lowercase_ascii(oneTrick.champion);
+         let substring = String.lowercase_ascii(searchKey);
+         let jsIndexOf: (string, string) => int = [%raw
            {|
           function indexOf(string, substring) {
             return string.indexOf(substring);
@@ -76,7 +76,7 @@ let filterBySearchKey = (searchKey: string, oneTricks) =>
     oneTricks;
   };
 
-let capitalize: string => string = [%bs.raw
+let capitalize: string => string = [%raw
   {|
   function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.substring(1, string.length)

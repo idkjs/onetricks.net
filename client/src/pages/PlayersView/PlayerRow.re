@@ -1,4 +1,3 @@
-let component = ReasonReact.statelessComponent("PlayerRow");
 
 let challengerIcon = "http://media.onetricks.net/images/ranks/challengers.png";
 let grandmasterIcon = "http://media.onetricks.net/images/ranks/grandmaster.png";
@@ -22,15 +21,15 @@ let generateOpGGLink = (region, name) =>
     "https://" ++ region ++ ".op.gg/summoner/userName=" ++ name;
   };
 
-let make = (~number: int, ~player: Types.player, _children) => {
-  ...component,
-  render: _self =>
+[@react.component]
+let make = (~number: int, ~player: TTypes.player) => {
+
     <tr className="players-table-tr">
       <td className="players-table-td__row-number">
         {ReactUtils.ite(number)}
       </td>
       <td className="players-table-td">
-        {player.region |> Region.toString |> String.uppercase |> ReactUtils.ste}
+        {player.region |> Region.toString |> String.uppercase_ascii |> ReactUtils.ste}
       </td>
       <td className="players-table-td">
         {player.rank |> Rank.toString |> getRankImage}
@@ -72,5 +71,5 @@ let make = (~number: int, ~player: Types.player, _children) => {
           {player.region |> Region.toString |> ReactUtils.ste}
         </a>
       </td>
-    </tr>,
+    </tr>
 };

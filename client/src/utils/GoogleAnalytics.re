@@ -1,4 +1,4 @@
-let send: (string, string) => unit = [%bs.raw
+let send: (string, string) => unit = [%raw
   {|
   function send(pathname, search) {
     if (typeof window.ga === 'function') {

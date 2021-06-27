@@ -1,17 +1,9 @@
-let component = ReasonReact.statelessComponent("Loader");
-
-let loaderPath: string = [%bs.raw
-  {|
+let loaderPath: string = [%raw {|
   require("../assets/misc/loading.svg")
-|}
-];
-
+|}];
+[@react.component]
 let make = () => {
-  ...component,
-  render: _self =>
-    <div className="loader center-align">
-      <img src=loaderPath className="loader-img" alt="Loading!" />
-    </div>,
+  <div className="loader center-align">
+    <img src=loaderPath className="loader-img" alt="Loading!" />
+  </div>;
 };
-
-let default = ReasonReact.wrapReasonForJs(~component, _jsProps => make());

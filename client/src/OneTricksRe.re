@@ -1,4 +1,4 @@
-open Types;
+open TTypes;
 
 type action =
   | ResetSearchKey
@@ -38,374 +38,365 @@ type state = {
   playersView,
 };
 
-module Router = Router.Router;
-
-let component = ReasonReact.reducerComponent("OneTricksRe");
-
-let make = _children => {
-  ...component,
-  initialState: () => {
-    championPane: {
-      searchKey: "",
-      sortBy: Sorts.Number,
-      threshholdCountToShow: 0,
-      oneTricks: [],
-    },
-    misc: {
-      areChampionPanesMerged: true,
-      areImagesLoaded: false,
-      isMultiRegionFilterOn: false,
-      region: Region.All,
-      regions: Region.list,
-    },
-    playersView: {
-      sortKey: Sort.WinRate,
-      shouldSortReverse: false,
-    },
-  },
-  reducer: (action, state) =>
-    switch (action) {
-    | Nothing =>
-      Js.log("Nothing will happen");
-      ReasonReact.Update(state);
-    | SetRegion(value) =>
-      ReasonReact.Update({
-        ...state,
-        misc: {
-          ...state.misc,
-          region: Region.fromString(value),
+// module Router = Router.Router;
+module Container = Router.Router.Container;
+// open RouterConfig;
+[@react.component]
+let make = () => {
+  let (state, dispatch) =
+    React.useReducer(
+      (state, action) =>
+        switch (action) {
+        | Nothing =>
+          Js.log("Nothing will happen");
+          state;
+        | SetRegion(value) => {
+            ...state,
+            misc: {
+              ...state.misc,
+              region: Region.fromString(value),
+            },
+          }
+        | SetSearchKey(value) => {
+            ...state,
+            championPane: {
+              ...state.championPane,
+              searchKey: value,
+            },
+          }
+        | SetSortKey(sortKey) => {
+            ...state,
+            playersView: {
+              sortKey,
+              shouldSortReverse:
+                if (sortKey == state.playersView.sortKey) {
+                  !state.playersView.shouldSortReverse;
+                } else {
+                  false;
+                },
+            },
+          }
+        | SetChampionIconsSortKey(sortKey) => {
+            ...state,
+            championPane: {
+              ...state.championPane,
+              sortBy: sortKey,
+            },
+          }
+        | SetOneTricks(oneTricks) => {
+            ...state,
+            championPane: {
+              ...state.championPane,
+              oneTricks,
+            },
+          }
+        | ToggleMultiRegionFilter => {
+            ...state,
+            misc: {
+              ...state.misc,
+              regions:
+                if (state.misc.isMultiRegionFilterOn) {
+                  [];
+                } else if (Region.toString(state.misc.region) == "all") {
+                  Region.list;
+                } else {
+                  [state.misc.region];
+                },
+              isMultiRegionFilterOn: !state.misc.isMultiRegionFilterOn,
+            },
+          }
+        | ToggleMerge => {
+            ...state,
+            misc: {
+              ...state.misc,
+              areChampionPanesMerged: !state.misc.areChampionPanesMerged,
+            },
+          }
+        | ToggleRegion(r) =>
+          let region = Region.fromString(r);
+          let newRegions =
+            if (state.misc.regions |> List.mem(region)) {
+              state.misc.regions |> List.filter(r => r !== region);
+            } else {
+              List.append(state.misc.regions, [region]);
+            };
+          {
+            ...state,
+            misc: {
+              ...state.misc,
+              regions: newRegions,
+            },
+          };
+        | _ => state
         },
-      })
-    | SetSearchKey(value) =>
-      ReasonReact.Update({
-        ...state,
+      {
         championPane: {
-          ...state.championPane,
-          searchKey: value,
+          searchKey: "",
+          sortBy: Sorts.Number,
+          threshholdCountToShow: 0,
+          oneTricks: [],
         },
-      })
-    | SetSortKey(sortKey) =>
-      ReasonReact.Update({
-        ...state,
+        misc: {
+          areChampionPanesMerged: true,
+          areImagesLoaded: false,
+          isMultiRegionFilterOn: false,
+          region: Region.All,
+          regions: Region.list,
+        },
         playersView: {
-          sortKey,
-          shouldSortReverse:
-            if (sortKey == state.playersView.sortKey) {
-              !state.playersView.shouldSortReverse;
-            } else {
-              false;
-            },
+          sortKey: Sort.WinRate,
+          shouldSortReverse: false,
         },
-      })
-    | SetChampionIconsSortKey(sortKey) =>
-      ReasonReact.Update({
-        ...state,
-        championPane: {
-          ...state.championPane,
-          sortBy: sortKey,
-        },
-      })
-    | SetOneTricks(oneTricks) =>
-      ReasonReact.Update({
-        ...state,
-        championPane: {
-          ...state.championPane,
-          oneTricks,
-        },
-      })
-    | ToggleMultiRegionFilter =>
-      ReasonReact.Update({
-        ...state,
-        misc: {
-          ...state.misc,
-          regions:
-            if (state.misc.isMultiRegionFilterOn) {
-              [];
-            } else if (Region.toString(state.misc.region) == "all") {
-              Region.list;
-            } else {
-              [state.misc.region];
-            },
-          isMultiRegionFilterOn: !state.misc.isMultiRegionFilterOn,
-        },
-      })
-    | ToggleMerge =>
-      ReasonReact.Update({
-        ...state,
-        misc: {
-          ...state.misc,
-          areChampionPanesMerged: !state.misc.areChampionPanesMerged,
-        },
-      })
-    | ToggleRegion(r) =>
-      let region = Region.fromString(r);
-      let newRegions =
-        if (state.misc.regions |> List.mem(region)) {
-          state.misc.regions |> List.filter(r => r !== region);
-        } else {
-          List.append(state.misc.regions, [region]);
-        };
-      ReasonReact.Update({
-        ...state,
-        misc: {
-          ...state.misc,
-          regions: newRegions,
-        },
-      });
-    | _ => ReasonReact.Update(state)
-    },
-  didMount: self => {
+      },
+    );
+  React.useEffect0(() => {
     let watcherID =
-      ReasonReact.Router.watchUrl(url =>
+      ReasonReactRouter.watchUrl(url =>
         GoogleAnalytics.send(
-          [%bs.raw {| window.location.pathname |}],
+          [%raw {| window.location.pathname |}],
           url.search,
         )
       );
-    self.onUnmount(() => ReasonReact.Router.unwatchUrl(watcherID));
-    OneTricksService.get(payload => self.send(SetOneTricks(payload)));
-  },
-  render: self => {
-    let regionatedOneTricks: oneTricks =
-      self.state.championPane.oneTricks
-      |> List.map(({champion, players}) => {
-           let newPlayers =
-             if (!self.state.misc.isMultiRegionFilterOn
-                 && Region.toString(self.state.misc.region) == "all") {
-               /* optimization */
-               players;
-             } else {
-               players
-               |> List.filter((player: player) =>
-                    self.state.misc.isMultiRegionFilterOn
-                      ? self.state.misc.regions |> List.mem(player.region)
-                      : self.state.misc.region === player.region
-                  );
-             };
-           {champion, players: newPlayers};
-         })
-      |> (
-        switch (self.state.championPane.sortBy) {
-        | Sorts.WinRate => Sorts.oneTricksByWinRate
-        | _ => Sorts.numberOfOneTricks
-        }
-      )
-      |> List.filter(({players}) => List.length(players) > 0)
-      |> OneTricksHelpers.filterBySearchKey(
-           String.lowercase(
-             JsUtils.String.keepOnlyAlphabetical(
-               self.state.championPane.searchKey,
-             ),
-           ),
-         );
-    <Router.Container>
-      ...{(~currentRoute) =>
-        <div className="one-tricks-re">
-          <Header
-            searchKey={self.state.championPane.searchKey}
-            onSearchKeyChange={event =>
-              self.send(SetSearchKey(ReactUtils.getEventValue(event)))
-            }
-          />
-          <Link
-            route=RouterConfig.Home
-            isActive={currentRoute == RouterConfig.Home}>
-            {ReactUtils.ste("home")}
-          </Link>
-          {ReactUtils.ste(" | ")}
-          <Link
-            route=RouterConfig.FAQ isActive={currentRoute == RouterConfig.FAQ}>
-            {ReactUtils.ste("faq")}
-          </Link>
-          {ReactUtils.ste(" | ")}
-          <Link
-            route=RouterConfig.FeatureRequests
-            isActive={currentRoute == RouterConfig.FeatureRequests}>
-            {ReactUtils.ste("feature requests & bug reports")}
-          </Link>
-          {ReactUtils.ste(" | ")}
-          <Link
-            route=RouterConfig.RiotEndorsement
-            isActive={currentRoute == RouterConfig.RiotEndorsement}>
-            {ReactUtils.ste("(lack of) Riot Endorsement")}
-          </Link>
-          <ChampionPaneUtilities
-            areChampionPanesMerged={self.state.misc.areChampionPanesMerged}
-            isMultiRegionFilterOn={self.state.misc.isMultiRegionFilterOn}
-            regions={
-              self.state.misc.regions
-              |> Array.of_list
-              |> Array.map(Region.toString)
-            }
-            toggleMerge={_event => self.send(ToggleMerge)}
-            region={Region.toString(self.state.misc.region)}
-            toggleRegion={regionValue =>
-              self.send(ToggleRegion(regionValue))
-            }
-            toggleMultiRegionFilter={_event =>
-              self.send(ToggleMultiRegionFilter)
-            }
-            setRegionFilter={event =>
-              self.send(SetRegion(ReactUtils.getEventValue(event)))
-            }
-            setChampionIconsSortKey={value =>
-              self.send(SetChampionIconsSortKey(value))
-            }
-            sortBy={self.state.championPane.sortBy}
-          />
-          {switch (
-             ReasonReact.Router.dangerouslyGetInitialUrl().path,
-             ReasonReact.Router.dangerouslyGetInitialUrl().search,
-           ) {
-           | (["champions", championName, ...rest], _search) =>
-             let url = ReasonReact.Router.dangerouslyGetInitialUrl();
-             let rank =
-               switch (url.path, url.search) {
-               | (["champions", _championName], "rank=challenger") => Rank.Challenger
-               | (["champions", _championName], "rank=masters") => Rank.Masters
-               | (["champions", _championName], "") => Rank.All
-               | (["champions", _championName, _], "rank=challenger") => Rank.Challenger
-               | (["champions", _championName, _], "rank=masters") => Rank.Masters
-               | (["champions", _championName, _], "") => Rank.All
-               | (_, _) => Rank.All
-               };
-             <ul className="champions-page-nav">
-               <li>
-                 <Link
-                   route={RouterConfig.PlayersView(championName, rank)}
-                   isActive={rest |> List.length == 0}>
-                   {ReactUtils.ste("players")}
-                 </Link>
-               </li>
-               <li>
-                 <Link
-                   route={
-                     RouterConfig.RunesSummonersItems(championName, rank)
-                   }
-                   isActive={
-                     url
-                     |> RouterConfig.isRouteOrSubroute(
-                          ~ofRoute=
-                            RouterConfig.RunesSummonersItems(
-                              championName,
-                              rank,
-                            ),
-                        )
-                   }>
-                   {ReactUtils.ste("runes, summoners, & items")}
-                 </Link>
-               </li>
-               <li>
-                 <Link
-                   route={RouterConfig.Matchups(championName, rank)}
-                   isActive={
-                     url
-                     |> RouterConfig.isRouteOrSubroute(
-                          ~ofRoute=RouterConfig.Matchups(championName, rank),
-                        )
-                   }>
-                   {ReactUtils.ste("champion matchups")}
-                 </Link>
-               </li>
-               <li>
-                 <Link
-                   route={RouterConfig.MatchHistory(championName, rank)}
-                   isActive={
-                     url
-                     |> RouterConfig.isRouteOrSubroute(
-                          ~ofRoute=
-                            RouterConfig.MatchHistory(championName, rank),
-                        )
-                   }>
-                   {ReactUtils.ste("match history")}
-                 </Link>
-               </li>
-             </ul>;
-           | _ => ReasonReact.null
-           }}
-          {switch (currentRoute) {
-           | RouterConfig.Home =>
-             let regionInfoText =
-               Region.toDisplayText(
-                 ~isMultiRegionFilterOn=self.state.misc.isMultiRegionFilterOn,
-                 ~region=self.state.misc.region,
-                 ~regions=self.state.misc.regions,
-               );
-             <ContentPane
-               isMultiRegionFilterOn={self.state.misc.isMultiRegionFilterOn}
-               regions={self.state.misc.regions}
-               allPlayers=regionatedOneTricks
-               regionInfoText
-               areChampionPanesMerged={self.state.misc.areChampionPanesMerged}
-             />;
-           | RouterConfig.PlayersView(currentChampion, rank) =>
-             let players =
-               regionatedOneTricks
-               |> OneTricksHelpers.filterPlayersByRank(_, ~rank)
-               |> OneTricksHelpers.extractPlayers(~currentChampion, _);
-             if (List.length(players) == 0) {
-               <div className="empty-results">
-                 {ReactUtils.ste(
-                    "No players found for the champion: "
-                    ++ currentChampion
-                    ++ ".",
-                  )}
-               </div>;
-             } else {
-               <PlayersView
-                 players
-                 champ=currentChampion
-                 show=true
-                 onSort={sortKey => self.send(SetSortKey(sortKey))}
-                 sortKey={self.state.playersView.sortKey}
-                 sortReverse={self.state.playersView.shouldSortReverse}
-                 ranks=[rank]
-                 regions={
-                           if (self.state.misc.isMultiRegionFilterOn) {
-                             self.state.misc.regions;
-                           } else {
-                             [self.state.misc.region];
-                           }
-                         }
-               />;
-             };
-           | RouterConfig.Matchups(_currentChampion, _rank) =>
-             <div>
-               {ReactUtils.ste(
-                  "Matchups will be implemented in the near future!",
-                )}
-             </div>
-           | RouterConfig.MatchHistory(currentChampion, rank) =>
-             <MatchHistory
-               championName=currentChampion
-               ranks=[rank]
-               regions={
-                         if (self.state.misc.isMultiRegionFilterOn) {
-                           self.state.misc.regions;
-                         } else {
-                           [self.state.misc.region];
-                         }
-                       }
-             />
-           | RouterConfig.RunesSummonersItems(currentChampion, rank) =>
-             <RunesSummonersItems
-               championName=currentChampion
-               ranks=[rank]
-               regions={
-                         if (self.state.misc.isMultiRegionFilterOn) {
-                           self.state.misc.regions;
-                         } else {
-                           [self.state.misc.region];
-                         }
-                       }
-             />
-           | RouterConfig.FeatureRequests => <FeatureRequests />
-           | RouterConfig.FAQ => <FAQ.Jsx2 />
-           | RouterConfig.RiotEndorsement => <Copyright />
-           | RouterConfig.NotFound => <NotFound />
-           }}
-        </div>
+    Some(
+      () => {
+        ReasonReactRouter.unwatchUrl(watcherID);
+        OneTricksService.get(payload => dispatch(SetOneTricks(payload)));
+      },
+    );
+  });
+  let isActive: (RouterConfig.route, RouterConfig.route) => bool =
+    (currentRoute, route) => currentRoute == route;
+
+  let regionatedOneTricks: oneTricks =
+    state.championPane.oneTricks
+    |> List.map(({champion, players}) => {
+         let newPlayers =
+           if (!state.misc.isMultiRegionFilterOn
+               && Region.toString(state.misc.region) == "all") {
+             /* optimization */
+             players;
+           } else {
+             players
+             |> List.filter((player: player) =>
+                  state.misc.isMultiRegionFilterOn
+                    ? state.misc.regions |> List.mem(player.region)
+                    : state.misc.region === player.region
+                );
+           };
+         {champion, players: newPlayers};
+       })
+    |> (
+      switch (state.championPane.sortBy) {
+      | Sorts.WinRate => Sorts.oneTricksByWinRate
+      | _ => Sorts.numberOfOneTricks
       }
-    </Router.Container>;
-  },
+    )
+    |> List.filter(({players}) => List.length(players) > 0)
+    |> OneTricksHelpers.filterBySearchKey(
+         String.lowercase_ascii(
+           JsUtils.String.keepOnlyAlphabetical(state.championPane.searchKey),
+         ),
+       );
+  <Container>
+    ...{(~currentRoute) =>
+      <div className="one-tricks-re">
+        <Header
+          searchKey={state.championPane.searchKey}
+          onSearchKeyChange={event =>
+            dispatch(SetSearchKey(ReactUtils.getEventValue(event)))
+          }
+        />
+        <Link
+          route=RouterConfig.Home isActive={isActive(currentRoute, RouterConfig.Home)}>
+          {ReactUtils.ste("home")}
+        </Link>
+        {ReactUtils.ste(" | ")}
+        <Link
+          route=RouterConfig.FAQ isActive={currentRoute == RouterConfig.FAQ}>
+          {ReactUtils.ste("faq")}
+        </Link>
+        {ReactUtils.ste(" | ")}
+        <Link
+          route=RouterConfig.FeatureRequests
+          isActive={currentRoute == RouterConfig.FeatureRequests}>
+          {ReactUtils.ste("feature requests & bug reports")}
+        </Link>
+        {ReactUtils.ste(" | ")}
+        <Link
+          route=RouterConfig.RiotEndorsement
+          isActive={currentRoute == RouterConfig.RiotEndorsement}>
+          {ReactUtils.ste("(lack of) Riot Endorsement")}
+        </Link>
+        <ChampionPaneUtilities
+          areChampionPanesMerged={state.misc.areChampionPanesMerged}
+          isMultiRegionFilterOn={state.misc.isMultiRegionFilterOn}
+          regions={
+            state.misc.regions |> Array.of_list |> Array.map(Region.toString)
+          }
+          toggleMerge={_event => dispatch(ToggleMerge)}
+          region={Region.toString(state.misc.region)}
+          toggleRegion={regionValue => dispatch(ToggleRegion(regionValue))}
+          toggleMultiRegionFilter={_event =>
+            dispatch(ToggleMultiRegionFilter)
+          }
+          setRegionFilter={event =>
+            dispatch(SetRegion(ReactUtils.getEventValue(event)))
+          }
+          setChampionIconsSortKey={value =>
+            dispatch(SetChampionIconsSortKey(value))
+          }
+          sortBy={state.championPane.sortBy}
+        />
+        {switch (
+           ReasonReactRouter.dangerouslyGetInitialUrl().path,
+           ReasonReactRouter.dangerouslyGetInitialUrl().search,
+         ) {
+         | (["champions", championName, ...rest], _search) =>
+           let url = ReasonReactRouter.dangerouslyGetInitialUrl();
+           let rank =
+             switch (url.path, url.search) {
+             | (["champions", _championName], "rank=challenger") => Rank.Challenger
+             | (["champions", _championName], "rank=masters") => Rank.Masters
+             | (["champions", _championName], "") => Rank.All
+             | (["champions", _championName, _], "rank=challenger") => Rank.Challenger
+             | (["champions", _championName, _], "rank=masters") => Rank.Masters
+             | (["champions", _championName, _], "") => Rank.All
+             | (_, _) => Rank.All
+             };
+           <ul className="champions-page-nav">
+             <li>
+               <Link
+                 route={RouterConfig.PlayersView(championName, rank)}
+                 isActive={rest |> List.length == 0}>
+                 {ReactUtils.ste("players")}
+               </Link>
+             </li>
+             <li>
+               <Link
+                 route={RouterConfig.RunesSummonersItems(championName, rank)}
+                 isActive={
+                   url
+                   |> RouterConfig.isRouteOrSubroute(
+                        ~ofRoute=
+                          RouterConfig.RunesSummonersItems(
+                            championName,
+                            rank,
+                          ),
+                      )
+                 }>
+                 {ReactUtils.ste("runes, summoners, & items")}
+               </Link>
+             </li>
+             <li>
+               <Link
+                 route={RouterConfig.Matchups(championName, rank)}
+                 isActive={
+                   url
+                   |> RouterConfig.isRouteOrSubroute(
+                        ~ofRoute=RouterConfig.Matchups(championName, rank),
+                      )
+                 }>
+                 {ReactUtils.ste("champion matchups")}
+               </Link>
+             </li>
+             <li>
+               <Link
+                 route={RouterConfig.MatchHistory(championName, rank)}
+                 isActive={
+                   url
+                   |> RouterConfig.isRouteOrSubroute(
+                        ~ofRoute=
+                          RouterConfig.MatchHistory(championName, rank),
+                      )
+                 }>
+                 {ReactUtils.ste("match history")}
+               </Link>
+             </li>
+           </ul>;
+         | _ => React.null
+         }}
+        {switch (currentRoute) {
+         | RouterConfig.Home =>
+           let regionInfoText =
+             Region.toDisplayText(
+               ~isMultiRegionFilterOn=state.misc.isMultiRegionFilterOn,
+               ~region=state.misc.region,
+               ~regions=state.misc.regions,
+             );
+           <ContentPane
+             isMultiRegionFilterOn={state.misc.isMultiRegionFilterOn}
+             regions={state.misc.regions}
+             allPlayers=regionatedOneTricks
+             regionInfoText
+             areChampionPanesMerged={state.misc.areChampionPanesMerged}
+           />;
+         | RouterConfig.PlayersView(currentChampion, rank) =>
+           let players =
+             regionatedOneTricks
+             |> OneTricksHelpers.filterPlayersByRank(_, ~rank)
+             |> OneTricksHelpers.extractPlayers(~currentChampion, _);
+           if (List.length(players) == 0) {
+             <div className="empty-results">
+               {ReactUtils.ste(
+                  "No players found for the champion: "
+                  ++ currentChampion
+                  ++ ".",
+                )}
+             </div>;
+           } else {
+             <PlayersView
+               players
+               champ=currentChampion
+               show=true
+               onSort={sortKey => dispatch(SetSortKey(sortKey))}
+               sortKey={state.playersView.sortKey}
+               sortReverse={state.playersView.shouldSortReverse}
+               ranks=[rank]
+               regions={
+                         if (state.misc.isMultiRegionFilterOn) {
+                           state.misc.regions;
+                         } else {
+                           [state.misc.region];
+                         }
+                       }
+             />;
+           };
+         | RouterConfig.Matchups(_currentChampion, _rank) =>
+           <div>
+             {ReactUtils.ste(
+                "Matchups will be implemented in the near future!",
+              )}
+           </div>
+         | RouterConfig.MatchHistory(currentChampion, rank) =>
+           <MatchHistory
+             championName=currentChampion
+             ranks=[rank]
+             regions={
+                       if (state.misc.isMultiRegionFilterOn) {
+                         state.misc.regions;
+                       } else {
+                         [state.misc.region];
+                       }
+                     }
+           />
+         | RouterConfig.RunesSummonersItems(currentChampion, rank) =>
+           <RunesSummonersItems
+             championName=currentChampion
+             ranks=[rank]
+             regions={
+                       if (state.misc.isMultiRegionFilterOn) {
+                         state.misc.regions;
+                       } else {
+                         [state.misc.region];
+                       }
+                     }
+           />
+         | RouterConfig.FeatureRequests => <FeatureRequests />
+         | RouterConfig.FAQ => <FAQ />
+         | RouterConfig.RiotEndorsement => <Copyright />
+         | RouterConfig.NotFound => <NotFound />
+         }}
+      </div>
+    }
+  </Container>;
 };

@@ -1,5 +1,3 @@
-let component = ReasonReact.statelessComponent("Header");
-
 module Styles = {
   open Css;
   let mainHeader =
@@ -23,19 +21,18 @@ let title = "League of Legends One Tricks";
 
 let caption = "Jack of No Trades, Master of One";
 
-let make = (~onSearchKeyChange, ~searchKey, _children) => {
-  ...component,
-  render: _self =>
-    <div
-      className="header-container"
-      onClick=(_event => ReasonReact.Router.push("/"))>
-      <div className="float-left">
-        <h1 className=Styles.mainHeader> (ReactUtils.ste(title)) </h1>
-        <h2 className=Styles.caption> (ReactUtils.ste(caption)) </h2>
-      </div>
-      <div className=("float-right " ++ Styles.marginTopSearchBar)>
-        <ChampionSearch onChange=onSearchKeyChange value=searchKey />
-      </div>
-      <div className="clear-both" />
-    </div>,
+[@react.component]
+let make = (~onSearchKeyChange, ~searchKey) => {
+  <div
+    className="header-container"
+    onClick={_event => ReasonReactRouter.push("/")}>
+    <div className="float-left">
+      <h1 className=Styles.mainHeader> {ReactUtils.ste(title)} </h1>
+      <h2 className=Styles.caption> {ReactUtils.ste(caption)} </h2>
+    </div>
+    <div className={"float-right " ++ Styles.marginTopSearchBar}>
+      <ChampionSearch onChange=onSearchKeyChange value=searchKey />
+    </div>
+    <div className="clear-both" />
+  </div>;
 };

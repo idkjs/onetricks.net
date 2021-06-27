@@ -1,4 +1,4 @@
-[@bs.config {jsx: 3}]
+
 module Styles = {
   open Css;
   let qa =
@@ -47,16 +47,10 @@ let make = () =>
     <div className=Styles.qa>
       {ReactUtils.lte(
          List.map(
-           ((question, answer)) => <QA.Jsx2 key=question question answer />,
+           ((question, answer)) => <QA key=question question answer />,
            qas,
          ),
        )}
     </div>
   </div>;
 
-module Jsx2 = {
-  let component = ReasonReact.statelessComponent("FAQ");
-  /* `children` is not labelled, as it is a regular parameter in version 2 of JSX */
-  let make = children =>
-    ReasonReactCompat.wrapReactForReasonReact(make, makeProps(), children);
-};

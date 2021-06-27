@@ -1,4 +1,4 @@
-open Types;
+open TTypes;
 
 let player = json =>
   Json.Decode.{

@@ -1,4 +1,3 @@
-let component = ReasonReact.statelessComponent("ChampionSearch");
 
 module Styles = {
   open Css;
@@ -14,12 +13,12 @@ module Styles = {
 
 let searchIcon = "http://media.onetricks.net/images/misc/search.svg";
 
-let make = (~onChange, ~value: string, _children) => {
-  ...component,
-  render: _self =>
+[@react.component]
+let make = (~onChange, ~value: string) => {
+
     switch (
-      ReasonReact.Router.dangerouslyGetInitialUrl().path,
-      ReasonReact.Router.dangerouslyGetInitialUrl().search,
+      ReasonReactRouter.dangerouslyGetInitialUrl().path,
+      ReasonReactRouter.dangerouslyGetInitialUrl().search,
     ) {
     | ([], "") =>
       <span className="champion-search">
@@ -31,6 +30,6 @@ let make = (~onChange, ~value: string, _children) => {
           placeholder="Search Champions"
         />
       </span>
-    | _ => ReasonReact.null
-    },
+    | _ => React.null
+    }
 };

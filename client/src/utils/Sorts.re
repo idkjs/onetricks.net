@@ -1,6 +1,6 @@
-open Types;
+open TTypes;
 
-let sanitize = a => a |> String.lowercase |> String.trim;
+let sanitize = a => a |> String.lowercase_ascii |> String.trim;
 
 let none = list => list;
 
@@ -110,10 +110,8 @@ let oneTricksWinRate = (list: players): float => {
   let wl =
     list
     |> List.fold_left(
-         (total, curr: player) => {
-           wins: total.wins + curr.wins,
-           losses: total.losses + curr.losses,
-         },
+         (total, curr: player) =>
+           {wins: total.wins + curr.wins, losses: total.losses + curr.losses},
          {wins: 0, losses: 0},
        );
   let wins = float_of_int(wl.wins);

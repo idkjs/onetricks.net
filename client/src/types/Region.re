@@ -66,7 +66,8 @@ let toReadableStringList = (regions: list(string)): string => {
   let tmp: string =
     regions
     |> List.fold_left(
-         (total, current) => total ++ ", " ++ String.uppercase(current),
+         (total, current) =>
+           total ++ ", " ++ String.uppercase_ascii(current),
          "",
        );
   if (String.length(tmp) > 0) {
@@ -87,7 +88,7 @@ let toDisplayText =
   } else if (region == All) {
     "All Regions.";
   } else {
-    "the " ++ (region |> toString |> String.uppercase) ++ " Region.";
+    "the " ++ (region |> toString |> String.uppercase_ascii) ++ " Region.";
   };
 
 let toCsvString = (regions: regions) => {
@@ -102,7 +103,10 @@ let toCsvString = (regions: regions) => {
          (total, current) =>
            total
            ++ ","
-           ++ (String.uppercase(current |> toString) |> String.lowercase),
+           ++ (
+             String.uppercase_ascii(current |> toString)
+             |> String.lowercase_ascii
+           ),
          "",
        );
   if (String.length(tmp) > 0) {

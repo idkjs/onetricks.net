@@ -1,4 +1,4 @@
-open Types;
+open TTypes;
 
 let parseIntoOneTricks = (decoded: players): oneTricks =>
   decoded

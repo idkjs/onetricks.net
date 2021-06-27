@@ -1,5 +1,3 @@
-let component = ReasonReact.statelessComponent("Link");
-
 module Router = Router.Router;
 
 module Styles = {
@@ -34,12 +32,11 @@ module Styles = {
     );
 };
 
-let make = (~route: RouterConfig.route, ~isActive: bool, children) => {
-  ...component,
-  render: _self =>
-    <Router.Link route>
-      <span className={Styles.className(isActive)}>
-        {ReactUtils.ate(children)}
-      </span>
-    </Router.Link>,
+[@react.component]
+let make = (~route: RouterConfig.route, ~isActive: bool, ~children) => {
+  <Router.Link route>
+    <span className={Styles.className(isActive)}>
+      {children}
+    </span>
+  </Router.Link>;
 };

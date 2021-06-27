@@ -1,22 +1,21 @@
-let component = ReasonReact.statelessComponent("ChampionPane");
 
-let make = (~champions, ~leagueType: Rank.rank=Rank.All, _children) => {
-  ...component,
-  render: _self =>
+[@react.component]
+let make = (~champions, ~leagueType: Rank.rank=Rank.All) => {
+
     <div className="champs">
       (
         ReactUtils.lte(
           List.map(
-            (pair: Types.oneTrick) =>
+            (pair: TTypes.oneTrick) =>
               <span
                 className="champ-open-links fade-in"
                 key=pair.champion
                 href="#"
                 onClick=(
                   _event =>
-                    ReasonReact.Router.push(
+                    ReasonReactRouter.push(
                       "/champions/"
-                      ++ String.lowercase(pair.champion)
+                      ++ String.lowercase_ascii(pair.champion)
                       ++ Rank.toRoute(leagueType),
                     )
                 )>
@@ -30,5 +29,5 @@ let make = (~champions, ~leagueType: Rank.rank=Rank.All, _children) => {
           ),
         )
       )
-    </div>,
+    </div>
 };

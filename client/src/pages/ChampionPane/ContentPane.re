@@ -1,5 +1,4 @@
-let component = ReasonReact.statelessComponent("ContentPane");
-
+[@react.component]
 let make =
     (
       ~isMultiRegionFilterOn: bool,
@@ -7,13 +6,12 @@ let make =
       ~allPlayers,
       ~regionInfoText: string,
       ~areChampionPanesMerged,
-      _children,
+
     ) => {
   let createHeaderText = (list: list('a), text: string) =>
     string_of_int(List.length(list)) ++ " " ++ text ++ " " ++ regionInfoText;
   {
-    ...component,
-    render: _self =>
+   
       <div>
         (
           if (isMultiRegionFilterOn && List.length(regions) == 0) {
@@ -21,7 +19,7 @@ let make =
               (ReactUtils.ste("No region is selected."))
             </div>;
           } else {
-            ReasonReact.null;
+            React.null;
           }
         )
         (
@@ -43,7 +41,7 @@ let make =
                 </div>
               </div>;
             } else {
-              ReasonReact.null;
+              React.null;
             };
           } else {
             /* How to utilize partition instead of multiple O(n) filters? */
@@ -65,7 +63,7 @@ let make =
             if (List.length(challengers) === 0
                 && List.length(grandmasters) === 0
                 && List.length(masters) === 0) {
-              ReasonReact.null;
+              React.null;
             } else {
               <div className="content-pane separated-pane">
                 (
@@ -87,7 +85,7 @@ let make =
                       />
                     </div>;
                   } else {
-                    ReasonReact.null;
+                    React.null;
                   }
                 )
                 (
@@ -109,7 +107,7 @@ let make =
                       />
                     </div>;
                   } else {
-                    ReasonReact.null;
+                    React.null;
                   }
                 )
                 (
@@ -131,13 +129,13 @@ let make =
                       />
                     </div>;
                   } else {
-                    ReasonReact.null;
+                    React.null;
                   }
                 )
               </div>;
             };
           }
         )
-      </div>,
+      </div>
   };
 };

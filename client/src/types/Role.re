@@ -40,7 +40,9 @@ let toCsvString = (roles: roles) => {
     roles
     |> List.fold_left(
          (total, current) =>
-           total ++ "," ++ String.uppercase(current |> toInt |> string_of_int),
+           total
+           ++ ","
+           ++ String.uppercase_ascii(current |> toInt |> string_of_int),
          "",
        );
   if (String.length(tmp) > 0) {

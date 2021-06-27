@@ -1,4 +1,3 @@
-let component = ReasonReact.statelessComponent("PlayersSortBtn");
 
 module Styles = {
   open Css;
@@ -20,23 +19,22 @@ let grabTriString = (~sortKey, ~activeSortKey, ~isReversed) =>
   } else {
     "";
   };
-
+[@react.component]
 let make =
     (
       ~onSort: Sort.sort => unit,
       ~sortKey: Sort.sort,
       ~activeSortKey: Sort.sort,
       ~isReversed,
-      children,
+      ~children,
     ) => {
-  ...component,
-  render: _self => {
+{
     let triString = grabTriString(~sortKey, ~activeSortKey, ~isReversed);
     let triangle =
       if (String.length(triString) > 0) {
         <span className="sort-tri"> (ReactUtils.ste(triString)) </span>;
       } else {
-        ReasonReact.null;
+        React.null;
       };
     let cn =
       Styles.sort
@@ -52,5 +50,5 @@ let make =
       (ReactUtils.ste(" "))
       triangle
     </span>;
-  },
+  }
 };
